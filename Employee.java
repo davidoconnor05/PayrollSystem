@@ -10,16 +10,16 @@ public class Employee {
     private int employeeId;
     private String name;
     private EmployeeType employeeType; // full time or part time
-    private String role;
+    private String employeePosition;
     private double salary;
     private int salaryPoint;
     private LocalDate hireDate;
     private LocalDate lastPromotionDate;
     private List<Payslip> payslips;
 
-    public Employee(String name, int employeeId EmployeeType employeeType, String role,
+    public Employee(String name, int employeeId, EmployeeType employeeType, String employeePosition,
                      double initialSalary, int initialSalaryPoint, LocalDate hireDate) {
-        this.role=role;
+        this.employeePosition=employeePosition;
         this.employeeId=employeeId;
         this.name = name;
         this.employeeType = employeeType;
@@ -35,7 +35,7 @@ public class Employee {
     }
 
     public String getRole() {
-        return role;
+        return employeePosition;
     }
 
     public EmployeeType getEmployeeType() {
@@ -74,7 +74,7 @@ public class Employee {
         this.salary = newSalary;
     }
 
-    private int getMaxSalaryPointForJob(String role) {
+    private int getMaxSalaryPointForJob(String employeePosition) {
             // code goes here
         return 5;  // temporary return value
     }
