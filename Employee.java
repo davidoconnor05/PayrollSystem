@@ -18,13 +18,13 @@ public class Employee {
     private List<Payslip> payslips;
 
     public Employee(String name, int employeeId, EmployeeType employeeType, String employeePosition,
-                     double initialSalary, int initialSalaryPoint, LocalDate hireDate) {
+                     double salary, int salaryPoint, LocalDate hireDate) {
         this.employeePosition=employeePosition;
         this.employeeId=employeeId;
         this.name = name;
         this.employeeType = employeeType;
-        this.salary = initialSalary;
-        this.salaryPoint = initialSalaryPoint;
+        this.salary = salary;
+        this.salaryPoint = salaryPoint;
         this.hireDate = hireDate;
         this.lastPromotionDate = hireDate;
         this.payslips = new ArrayList<>(); // Initialize as ArrayList of Payslip
@@ -34,7 +34,7 @@ public class Employee {
         return name;
     }
 
-    public String getRole() {
+    public String getEmployeePosition() {
         return employeePosition;
     }
 
