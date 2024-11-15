@@ -8,7 +8,7 @@ public class Payslip {
 
 
     // Call the readSalary method and capture the result
-    double salary = csvHandler.readSalary(jobTitle, scalePoint, filePath);
+    //double salary = csvHandler.readSalary(jobTitle, scalePoint, filePath);
 
     /**
      * Constructs a Payslip with specified details.
