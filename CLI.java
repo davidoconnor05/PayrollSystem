@@ -12,7 +12,8 @@ public class CLI {
         while (true) {
             System.out.println("\nChoose an option:");
             System.out.println("1. Create a new employee");
-            System.out.println("2. Exit");
+            System.out.println("2. Employee Info:");
+            System.out.println("3. Exit");
             System.out.print("Your choice: ");
 
             String choice = scanner.nextLine();
@@ -21,7 +22,7 @@ public class CLI {
                 case "1":
                     createEmployee(scanner);
                     break;
-                case "2":
+                case "3":
                     System.out.println("Exiting the system. Goodbye!");
                     scanner.close();
                     return;
@@ -87,6 +88,5 @@ public class CLI {
         System.out.println("\nEmployee created successfully:");
         System.out.println(newEmployee);
 
-        // Add logic here to save the employee to a database, file, or in-memory list
     }
 }

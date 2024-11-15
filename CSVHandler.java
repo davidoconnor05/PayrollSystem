@@ -19,7 +19,6 @@ public class CSVHandler {
     */
 
     // Returns lowest possible unique employee ID
-
     public static int getLowestUniqueId() {
         Set<Integer> existingIds = new HashSet<>();
 
@@ -56,7 +55,7 @@ public class CSVHandler {
         return id;
     }
 
-    // Writes a list of employees to a CSV file.
+    // Writes type Employee to a CSV file.
     public static void writeEmployeeToCSV(Employee employee) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("Employees.csv", true))) {
             // Format the employee data as a CSV line
@@ -79,6 +78,7 @@ public class CSVHandler {
             System.out.println("Error writing to CSV file: " + e.getMessage());
         }
     }
+
     // Method to read payslips from CSV
     /*
     public List<Payslip> readPayslips() {
