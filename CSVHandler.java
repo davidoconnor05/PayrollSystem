@@ -1,22 +1,53 @@
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.time.LocalDate;
 
 public class CSVHandler {
-    private static final String EMPLOYEE_FILE_PATH = "employees.csv";
-    private static final String PAYSLIP_FILE_PATH = "payslips.csv";
 
-    // Method to read employees from CSV
-    /*
-    public List<Employee> readEmployees() {
-        // Code goes here
+    public static List<Employee> readEmployeesFromCSV() {
+        List<Employee> employees = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader("Employees.csv"))) {
+            String line;
+
+            // Skip the header line if present
+            if ((line = br.readLine()) != null && line.startsWith("name")) {
+                // Continue reading the next lines
+            }
+
+            while ((line = br.readLine()) != null) {
+                // Split the line into parts by comma
+                String[] parts = line.split(",");
+
+                if (parts.length == 8) {
+                    // Parse each field
+                    int employeeId = Integer.parseInt(parts[0].trim());
+                    String name = parts[1].trim();
+                    Employee.EmployeeType employeeType = Employee.EmployeeType.valueOf(parts[2].trim());
+                    String jobTitle = parts[3].trim();
+                    double salary = Double.parseDouble(parts[4].trim());
+                    int salaryPoint = Integer.parseInt(parts[5].trim());
+                    LocalDate hireDate = LocalDate.parse(parts[6].trim());
+                    LocalDate lastPromotionDate = LocalDate.parse(parts[7].trim());
+
+                    // Create the Employee object and add it to the list
+                    Employee employee = new Employee(name, employeeId, employeeType, jobTitle, salary, salaryPoint, hireDate);
+                    employee.updateSalary(salary); // Ensures salary matches in case constructor defaulted
+                    employees.add(employee);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error reading employees from file: " + e.getMessage());
+        }
+
         return employees;
     }
-    */
 
     // Returns lowest possible unique employee ID
     public static int getLowestUniqueId() {
@@ -89,7 +120,7 @@ public class CSVHandler {
 
     // Method to write payslips to CSV
     public void writePayslips(List<Payslip> payslips) {
-       // Code goes here
+        // Code goes here
     }
 
     // Method to read salary from CSV
@@ -128,5 +159,4 @@ public class CSVHandler {
         // If not found, return -1 as a default value indicating salary not found
         return -1;
     }
-
 }

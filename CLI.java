@@ -2,8 +2,6 @@ import java.time.LocalDate;
 import java.util.Scanner;
 
 public class CLI {
-    private static int nextEmployeeId = 1; // For generating unique employee IDs
-
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
@@ -26,6 +24,10 @@ public class CLI {
                     System.out.println("Exiting the system. Goodbye!");
                     scanner.close();
                     return;
+                case "2":
+                    System.out.println("Employee Info:");
+                    System.out.println(CSVHandler.readEmployeesFromCSV());
+                    break;
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
