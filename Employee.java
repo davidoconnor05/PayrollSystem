@@ -76,8 +76,22 @@ public class Employee {
 
     private int getMaxSalaryPointForJob(String employeePosition) {
             // code goes here
-        return 5;  // temporary return value
+        return 4;  // temporary return value
     }
+
+    // Get an employee by their ID
+    public static Employee getEmployeeById(List<Employee> employees, int employeeId) {
+        // Iterate through the list of employees
+        for (Employee employee : employees) {
+            if (employee.getEmployeeId() == employeeId) {
+                return employee;
+            }
+        }
+        // If no employee is found, throw an exception
+        throw new IllegalArgumentException("No employee found with ID " + employeeId);
+
+    }
+
 
     @Override
     public String toString() {

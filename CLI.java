@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Scanner;
 
 public class CLI {
@@ -10,7 +11,7 @@ public class CLI {
         while (true) {
             System.out.println("\nChoose an option:");
             System.out.println("1. Create a new employee");
-            System.out.println("2. Employee Info:");
+            System.out.println("2. Employee info ");
             System.out.println("3. Exit");
             System.out.print("Your choice: ");
 
@@ -25,8 +26,7 @@ public class CLI {
                     scanner.close();
                     return;
                 case "2":
-                    System.out.println("Employee Info:");
-                    System.out.println(CSVHandler.readEmployeesFromCSV());
+                    employeeDetails(scanner);
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
@@ -89,6 +89,20 @@ public class CLI {
         // Print confirmation
         System.out.println("\nEmployee created successfully:");
         System.out.println(newEmployee);
+        }
+
+        private static void employeeDetails(Scanner scanner) {
+            System.out.print("Enter the employee ID: ");
+            try {
+                int employeeId = Integer.parseInt(scanner.nextLine());
+                // Load employee details to a list
+                List<Employee> employees = CSVHandler.readEmployeesFromCSV();
+                System.out.println(Employee.getEmployeeById(employees, employeeId));
+                return;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid ID. Please enter a number.");
+                return;
+            }
 
     }
 }
