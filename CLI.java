@@ -56,23 +56,7 @@ public class CLI {
         System.out.print("Enter the job title: ");
         String jobTitle = scanner.nextLine();
 
-        System.out.print("Enter the salary scale point: ");
-        int salaryPoint;
-        try {
-            salaryPoint = Integer.parseInt(scanner.nextLine());
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid scale point. Please enter a number.");
-            return;
-        }
 
-        // Calculate salary
-        double salary;
-        try {
-            salary = CSVHandler.readSalary(jobTitle, salaryPoint);
-        } catch (Exception e) {
-            System.out.println("Error reading salary from file: " + e.getMessage());
-            return;
-        }
 
         // Generate a unique employee ID
         int employeeId = CSVHandler.getLowestUniqueId();
@@ -80,18 +64,64 @@ public class CLI {
         // Set the hire date as the current date
         LocalDate hireDate = LocalDate.now();
 
-        // Create the new employee
-        Employee newEmployee = new Employee(name, employeeId, employeeType, jobTitle, salary, salaryPoint, hireDate);
+        // Handle full-time vs. part-time employee details
+        if (employeeType == Employee.EmployeeType.FULL_TIME) {
 
-        // Write employees to CSV
-        CSVHandler.writeEmployeeToCSV(newEmployee);
+            System.out.print("Enter the salary scale point: ");
+            int salaryPoint;
+            try {
+                salaryPoint = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid scale point. Please enter a number.");
+                return;
+            }
 
-        // Print confirmation
-        System.out.println("\nEmployee created successfully:");
-        System.out.println(newEmployee);
+            // Calculate salary for full-time employees
+            double salary;
+            try {
+                salary = CSVHandler.readSalary(jobTitle, salaryPoint);
+            } catch (Exception e) {
+                System.out.println("Error reading salary from file: " + e.getMessage());
+                return;
+            }
+
+            // Create a new full-time employee
+            Employee newEmployee = new Employee(name, employeeId, employeeType, jobTitle, salary, salaryPoint, hireDate);
+
+            // Write the employee to CSV
+            CSVHandler.writeEmployeeToCSV(newEmployee);
+
+            // Print confirmation
+            System.out.println("\nFull-time employee created successfully:");
+            System.out.println(newEmployee);
+
+        } else if (employeeType == Employee.EmployeeType.PART_TIME) {
+            // Get specific details for part-time employees
+            System.out.print("Enter the employees hourly rate: ");
+            double hourlyRate;
+            try {
+                hourlyRate = Double.parseDouble(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid hourly rate. Please enter a number.");
+                return;
+            }
+
+            // Create a new part-time employee
+            PartTimeEmployee newPartTimeEmployee = new PartTimeEmployee(
+                    name, employeeId, jobTitle, hourlyRate, 0, hireDate
+            );
+
+            // Write the part-time employee to CSV
+            //CSVHandler.writeEmployeeToCSV(newPartTimeEmployee);
+
+            // Print confirmation
+            System.out.println("\nPart-time employee created successfully:");
+            System.out.println(newPartTimeEmployee);
+        } else {
+            System.out.println("Unknown employee type.");
         }
-
-        private static void employeeDetails(Scanner scanner) {
+    }
+    private static void employeeDetails(Scanner scanner) {
             System.out.print("Enter the employee ID: ");
             try {
                 int employeeId = Integer.parseInt(scanner.nextLine());
