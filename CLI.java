@@ -56,8 +56,6 @@ public class CLI {
         System.out.print("Enter the job title: ");
         String jobTitle = scanner.nextLine();
 
-
-
         // Generate a unique employee ID
         int employeeId = CSVHandler.getLowestUniqueId();
 
@@ -112,7 +110,7 @@ public class CLI {
             );
 
             // Write the part-time employee to CSV
-            //CSVHandler.writeEmployeeToCSV(newPartTimeEmployee);
+            CSVHandler.writeEmployeeToCSV(newPartTimeEmployee);
 
             // Print confirmation
             System.out.println("\nPart-time employee created successfully:");

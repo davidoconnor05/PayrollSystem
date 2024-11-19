@@ -6,7 +6,7 @@ public class PartTimeEmployee extends Employee {
     private boolean hasSubmittedPaymentRequest;
 
     public PartTimeEmployee(String name, int employeeId, String employeePosition,
-                            double hourlyRate, int salaryPoint, LocalDate hireDate) {
+                            double hourlyRate, int hoursWorked, LocalDate hireDate) {
         super(name, employeeId, EmployeeType.PART_TIME, employeePosition, 0, 0, hireDate);
         this.hourlyRate = hourlyRate;
         this.hoursWorked = 0;
@@ -40,9 +40,9 @@ public class PartTimeEmployee extends Employee {
     @Override
     public String toString() {
         return super.toString() +
-                "\n Part-Time Info:" +
-                "\n  Hours Worked = " + hoursWorked +
-                ", Hourly Rate = " + hourlyRate +
-                ", Payment Request Submitted = " + hasSubmittedPaymentRequest;
+                "\n\n Part-Time Info:" +
+                "\n\n Hours Worked = " + hoursWorked +
+                ",\n Hourly Rate = " + hourlyRate +
+                ",\n Payment Request Submitted = " + hasSubmittedPaymentRequest;
     }
 }
