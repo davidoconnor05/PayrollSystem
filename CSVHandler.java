@@ -1,110 +1,85 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class CSVHandler {
 
     public static List<Employee> readEmployeesFromCSV() {
         List<Employee> employees = new ArrayList<>();
+        List<String[]> partTimeData = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader("Employees.csv"))) {
+        // Read part-time employee data first
+        try (BufferedReader br = new BufferedReader(new FileReader("PartTimeEmployees.csv"))) {
+            br.readLine(); // Skip the header line
+
             String line;
-
-            // Skip the header line if present
-            if ((line = br.readLine()) != null && line.startsWith("employeeId")) {
-                // Continue reading the next lines
-            }
-
             while ((line = br.readLine()) != null) {
-                // Split the line into parts by comma
+                partTimeData.add(line.split(","));
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading PartTimeEmployees.csv: " + e.getMessage());
+        }
+
+        // Read employees from Employees.csv
+        try (BufferedReader br = new BufferedReader(new FileReader("Employees.csv"))) {
+            br.readLine(); // Skip the header line
+
+            String line;
+            while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
 
-                if (parts.length == 8) {
-                    // Parse each field
-                    int employeeId = Integer.parseInt(parts[0].trim());
-                    String name = parts[1].trim();
-                    Employee.EmployeeType employeeType = Employee.EmployeeType.valueOf(parts[2].trim());
-                    String jobTitle = parts[3].trim();
-                    double salary = Double.parseDouble(parts[4].trim());
-                    int salaryPoint = Integer.parseInt(parts[5].trim());
-                    LocalDate hireDate = LocalDate.parse(parts[6].trim());
-                    LocalDate lastPromotionDate = LocalDate.parse(parts[7].trim());
+                String name = parts[0].trim();
+                int employeeId = Integer.parseInt(parts[1].trim());
+                Employee.EmployeeType employeeType = Employee.EmployeeType.valueOf(parts[2].trim());
+                String employeePosition = parts[3].trim();
+                double salary = Double.parseDouble(parts[4].trim());
+                int salaryPoint = Integer.parseInt(parts[5].trim());
+                LocalDate lastPromotionDate = LocalDate.parse(parts[6].trim());
+                double healthInsuranceRate = Double.parseDouble(parts[7].trim());
 
-                    if (employeeType == Employee.EmployeeType.FULL_TIME) {
-                        // Create and add a full-time Employee object
-                        Employee employee = new Employee(name, employeeId, employeeType, jobTitle, salary, salaryPoint, hireDate);
-                        employee.updateSalary(salary); // Ensure salary is correct
-                        employees.add(employee);
-                    } else if (employeeType == Employee.EmployeeType.PART_TIME) {
-                        // Read additional data for part-time employees
-                        PartTimeEmployee partTimeEmployee = readPartTimeEmployeeData(employeeId, name, jobTitle, salaryPoint, hireDate);
-                        if (partTimeEmployee != null) {
+                if (employeeType == Employee.EmployeeType.PART_TIME) {
+                    // Find the corresponding part-time data
+                    for (String[] partTimeParts : partTimeData) {
+                        int partTimeId = Integer.parseInt(partTimeParts[0].trim());
+                        if (partTimeId == employeeId) {
+                            double hourlyRate = Double.parseDouble(partTimeParts[1].trim());
+                            int hoursWorked = Integer.parseInt(partTimeParts[2].trim());
+                            boolean hasSubmittedPaymentRequest = Boolean.parseBoolean(partTimeParts[3].trim());
+
+                            // Create and add a PartTimeEmployee
+                            PartTimeEmployee partTimeEmployee = new PartTimeEmployee(
+                                    name,            // name of the employee
+                                    employeeId,      // unique employee ID
+                                    employeePosition, // job title
+                                    hourlyRate,      // hourly rate
+                                    hoursWorked,     // hours worked
+                                    LocalDate.now(), // assuming current date as the last promotion date
+                                    hasSubmittedPaymentRequest // payment request status
+                            );
+
                             employees.add(partTimeEmployee);
+                            break; // Stop searching once found
                         }
                     }
+            } else {
+                    // Create and add a full-time employee
+                    employees.add(new Employee(
+                            name, employeeId, employeeType, employeePosition,
+                            salary, salaryPoint, lastPromotionDate, healthInsuranceRate
+                    ));
                 }
             }
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("Error reading employees from file: " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error reading Employees.csv: " + e.getMessage());
         }
 
         return employees;
     }
 
-    private static PartTimeEmployee readPartTimeEmployeeData(int employeeId, String name, String jobTitle, int salaryPoint, LocalDate hireDate) {
-        try (BufferedReader br = new BufferedReader(new FileReader("PartTimeEmployees.csv"))) {
-            String line;
 
-            while ((line = br.readLine()) != null) {
-                // Skip empty lines
-                if (line.isBlank()) {
-                    continue;
-                }
-
-                // Split the line into parts by comma
-                String[] parts = line.split(",");
-                if (parts.length == 4) {
-                    int partTimeEmployeeId = Integer.parseInt(parts[0].trim());
-                    if (partTimeEmployeeId == employeeId) {
-                        // Parse additional part-time employee fields
-                        double hourlyRate = Double.parseDouble(parts[1].trim());
-                        int hoursWorked = Integer.parseInt(parts[2].trim());
-                        boolean hasSubmittedPaymentRequest = Boolean.parseBoolean(parts[3].trim());
-
-                        // Create and return a PartTimeEmployee object
-                        PartTimeEmployee partTimeEmployee = new PartTimeEmployee(
-                                name,
-                                employeeId,
-                                jobTitle,
-                                hourlyRate,
-                                hoursWorked,
-                                hireDate
-                        );
-
-                        if (hasSubmittedPaymentRequest) {
-                            partTimeEmployee.submitPaymentRequest();
-                        }
-
-                        return partTimeEmployee;
-                    }
-                }
-            }
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("Error reading part-time employee data: " + e.getMessage());
-        }
-
-        return null; // Return null if the part-time employee data is not found
-    }
-
-
-
-    // Returns lowest possible unique employee ID
     public static int getLowestUniqueId() {
         Set<Integer> existingIds = new HashSet<>();
 
@@ -119,10 +94,10 @@ public class CSVHandler {
                 // Split the line by commas
                 String[] parts = line.split(",");
 
-                // Parse and add the employeeId (first column) to the set
+                // Parse and add the employeeId (second column) to the set
                 if (parts.length > 1) {
                     try {
-                        int employeeId = Integer.parseInt(parts[0].trim());
+                        int employeeId = Integer.parseInt(parts[1].trim());
                         existingIds.add(employeeId);
                     } catch (NumberFormatException e) {
                         System.err.println("Error parsing employee ID: " + e.getMessage());
@@ -141,55 +116,46 @@ public class CSVHandler {
         return id;
     }
 
-    // Writes type Employee to a CSV file.
     public static void writeEmployeeToCSV(Employee employee) {
+        // Write to Employees.csv
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("Employees.csv", true))) {
-            // Ensure the line is written with a newline
-            String line = String.format("%d,%s,%s,%s,%.2f,%d,%s,%s",
-                    employee.getEmployeeId(),
+            String line = String.format("%s,%d,%s,%s,%.2f,%d,%s,%.2f",
                     employee.getName(),
+                    employee.getEmployeeId(),
                     employee.getEmployeeType(),
                     employee.getEmployeePosition(),
                     employee.getSalary(),
                     employee.getSalaryPoint(),
-                    employee.getHireDate(),
-                    employee.getLastPromotionDate());
+                    employee.getLastPromotionDate(),
+                    employee.getHealthInsuranceRate());
 
             writer.write(line);
-            writer.newLine(); // This ensures a newline is added after every employee
-
+            writer.newLine(); // Ensure a newline is added after every employee entry
             System.out.println("Employee data written to Employees.csv successfully.");
         } catch (IOException e) {
             System.out.println("Error writing to Employees.csv file: " + e.getMessage());
-            return;
         }
 
         // If the employee is part-time, write to PartTimeEmployees.csv
         if (employee instanceof PartTimeEmployee) {
-            writePartTimeEmployeeToCSV((PartTimeEmployee) employee);
-        }
-    }
+            PartTimeEmployee partTimeEmployee = (PartTimeEmployee) employee;
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter("PartTimeEmployees.csv", true))) {
+                String partTimeLine = String.format("%d,%.2f,%d,%b",
+                        partTimeEmployee.getEmployeeId(),
+                        partTimeEmployee.getHourlyRate(),
+                        partTimeEmployee.getHoursWorked(),
+                        partTimeEmployee.isPaymentRequestSubmitted());
 
-    private static void writePartTimeEmployeeToCSV(PartTimeEmployee partTimeEmployee) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("PartTimeEmployees.csv", true))) {
-            // Ensure the line is written with a newline
-            String line = String.format("%d,%.2f,%d,%b",
-                    partTimeEmployee.getEmployeeId(),
-                    partTimeEmployee.getHourlyRate(),
-                    partTimeEmployee.getHoursWorked(),
-                    partTimeEmployee.isPaymentRequestSubmitted());
-
-            writer.write(line);
-            writer.newLine(); // This ensures a newline is added after every part-time employee
-
-            System.out.println("Part-time employee data written to PartTimeEmployees.csv successfully.");
-        } catch (IOException e) {
-            System.out.println("Error writing to PartTimeEmployees.csv file: " + e.getMessage());
+                writer.write(partTimeLine);
+                writer.newLine(); // Ensure a newline is added after every part-time employee entry
+                System.out.println("Part-time employee data written to PartTimeEmployees.csv successfully.");
+            } catch (IOException e) {
+                System.out.println("Error writing to PartTimeEmployees.csv file: " + e.getMessage());
+            }
         }
     }
 
 
-    // Method to read salary from CSV
     public static double readSalary(String employeePosition, int salaryPoint) {
         try (BufferedReader br = new BufferedReader(new FileReader("ULSalaryInformation.csv"))) {
             String line;
@@ -198,6 +164,7 @@ public class CSVHandler {
                 if (line.isBlank() || line.startsWith("Category")) {
                     continue;
                 }
+
                 // Split the line into parts by comma
                 String[] parts = line.split(",");
 

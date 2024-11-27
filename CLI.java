@@ -11,7 +11,7 @@ public class CLI {
         while (true) {
             System.out.println("\nChoose an option:");
             System.out.println("1. Create a new employee");
-            System.out.println("2. Employee info ");
+            System.out.println("2. View employee details");
             System.out.println("3. Exit");
             System.out.print("Your choice: ");
 
@@ -21,13 +21,13 @@ public class CLI {
                 case "1":
                     createEmployee(scanner);
                     break;
+                case "2":
+                    employeeDetails(scanner);
+                    break;
                 case "3":
                     System.out.println("Exiting the system. Goodbye!");
                     scanner.close();
                     return;
-                case "2":
-                    employeeDetails(scanner);
-                    break;
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
@@ -59,12 +59,23 @@ public class CLI {
         // Generate a unique employee ID
         int employeeId = CSVHandler.getLowestUniqueId();
 
-        // Set the hire date as the current date
+        // Set the hire date and last promotion date as the current date
         LocalDate hireDate = LocalDate.now();
+        LocalDate lastPromotionDate = LocalDate.now();
 
-        // Handle full-time vs. part-time employee details
+        System.out.print("Enter the health insurance rate (as a percentage): ");
+        double healthInsuranceRate;
+        try {
+            healthInsuranceRate = Double.parseDouble(scanner.nextLine());
+            if (healthInsuranceRate < 0 || healthInsuranceRate > 100) {
+                throw new IllegalArgumentException("Health insurance rate must be between 0 and 100.");
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid health insurance rate. Please enter a number between 0 and 100.");
+            return;
+        }
+
         if (employeeType == Employee.EmployeeType.FULL_TIME) {
-
             System.out.print("Enter the salary scale point: ");
             int salaryPoint;
             try {
@@ -75,16 +86,17 @@ public class CLI {
             }
 
             // Calculate salary for full-time employees
-            double salary;
-            try {
-                salary = CSVHandler.readSalary(jobTitle, salaryPoint);
-            } catch (Exception e) {
-                System.out.println("Error reading salary from file: " + e.getMessage());
+            double salary = CSVHandler.readSalary(jobTitle, salaryPoint);
+            if (salary < 0) {
+                System.out.println("Salary information not found for the given job title and scale point.");
                 return;
             }
 
             // Create a new full-time employee
-            Employee newEmployee = new Employee(name, employeeId, employeeType, jobTitle, salary, salaryPoint, hireDate);
+            Employee newEmployee = new Employee(
+                    name, employeeId, employeeType, jobTitle, salary,
+                    salaryPoint, lastPromotionDate, healthInsuranceRate
+            );
 
             // Write the employee to CSV
             CSVHandler.writeEmployeeToCSV(newEmployee);
@@ -94,8 +106,7 @@ public class CLI {
             System.out.println(newEmployee);
 
         } else if (employeeType == Employee.EmployeeType.PART_TIME) {
-            // Get specific details for part-time employees
-            System.out.print("Enter the employees hourly rate: ");
+            System.out.print("Enter the hourly rate: ");
             double hourlyRate;
             try {
                 hourlyRate = Double.parseDouble(scanner.nextLine());
@@ -104,33 +115,44 @@ public class CLI {
                 return;
             }
 
-            // Create a new part-time employee
-            PartTimeEmployee newPartTimeEmployee = new PartTimeEmployee(
-                    name, employeeId, jobTitle, hourlyRate, 0, hireDate
+            // Assume the payment request is not submitted initially
+            boolean hasSubmittedPaymentRequest = false;
+
+            // Create a new PartTimeEmployee
+            PartTimeEmployee newEmployee = new PartTimeEmployee(
+                    name, employeeId, jobTitle, hourlyRate, 0, lastPromotionDate, hasSubmittedPaymentRequest
             );
 
-            // Write the part-time employee to CSV
-            CSVHandler.writeEmployeeToCSV(newPartTimeEmployee);
+            // Write the employee to CSV (you may need to implement a separate method for part-time employees)
+            CSVHandler.writeEmployeeToCSV(newEmployee);
 
             // Print confirmation
             System.out.println("\nPart-time employee created successfully:");
-            System.out.println(newPartTimeEmployee);
-        } else {
+            System.out.println(newEmployee);
+        }
+        else {
             System.out.println("Unknown employee type.");
         }
     }
-    private static void employeeDetails(Scanner scanner) {
-            System.out.print("Enter the employee ID: ");
-            try {
-                int employeeId = Integer.parseInt(scanner.nextLine());
-                // Load employee details to a list
-                List<Employee> employees = CSVHandler.readEmployeesFromCSV();
-                System.out.println(Employee.getEmployeeById(employees, employeeId));
-                return;
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid ID. Please enter a number.");
-                return;
-            }
 
+    /**
+     * Displays details of an employee by ID.
+     *
+     * @param scanner the Scanner object for reading user input.
+     */
+    private static void employeeDetails(Scanner scanner) {
+        System.out.print("Enter the employee ID: ");
+        try {
+            int employeeId = Integer.parseInt(scanner.nextLine());
+
+            List<Employee> employees = CSVHandler.readEmployeesFromCSV();
+            Employee employee = Employee.getEmployeeById(employees, employeeId);
+            System.out.println("\nEmployee Details:");
+            System.out.println(employee);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid ID. Please enter a number.");
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

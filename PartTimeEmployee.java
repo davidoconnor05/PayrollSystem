@@ -5,12 +5,13 @@ public class PartTimeEmployee extends Employee {
     private double hourlyRate;
     private boolean hasSubmittedPaymentRequest;
 
-    public PartTimeEmployee(String name, int employeeId, String employeePosition,
-                            double hourlyRate, int hoursWorked, LocalDate hireDate) {
-        super(name, employeeId, EmployeeType.PART_TIME, employeePosition, 0, 0, hireDate);
+    public PartTimeEmployee(String name, int employeeId, String jobTitle,
+                            double hourlyRate, int hoursWorked,
+                            LocalDate lastPromotionDate, boolean hasSubmittedPaymentRequest) {
+        super(name, employeeId, EmployeeType.PART_TIME, jobTitle, 0, 0, lastPromotionDate, 0);
         this.hourlyRate = hourlyRate;
-        this.hoursWorked = 0;
-        this.hasSubmittedPaymentRequest = false;
+        this.hoursWorked = hoursWorked;
+        this.hasSubmittedPaymentRequest = hasSubmittedPaymentRequest;
     }
 
     public int getHoursWorked() {
@@ -41,7 +42,7 @@ public class PartTimeEmployee extends Employee {
     public String toString() {
         return super.toString() +
                 "\n\n Part-Time Info:" +
-                "\n\n Hours Worked = " + hoursWorked +
+                "\n Hours Worked = " + hoursWorked +
                 ",\n Hourly Rate = " + hourlyRate +
                 ",\n Payment Request Submitted = " + hasSubmittedPaymentRequest;
     }

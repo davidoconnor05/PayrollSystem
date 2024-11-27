@@ -13,20 +13,20 @@ public class Employee {
     private String employeePosition;
     private double salary;
     private int salaryPoint;
-    private LocalDate hireDate;
     private LocalDate lastPromotionDate;
+    private double healthInsuranceRate; // percent of their income they pay to health insurance.
     private List<Payslip> payslips;
 
     public Employee(String name, int employeeId, EmployeeType employeeType, String employeePosition,
-                     double salary, int salaryPoint, LocalDate hireDate) {
+                     double salary, int salaryPoint, LocalDate lastPromotionDate, double healthInsuranceRate) {
         this.employeePosition=employeePosition;
         this.employeeId=employeeId;
         this.name = name;
         this.employeeType = employeeType;
         this.salary = salary;
         this.salaryPoint = salaryPoint;
-        this.hireDate = hireDate;
-        this.lastPromotionDate = hireDate;
+        this.lastPromotionDate = lastPromotionDate;
+        this.healthInsuranceRate = healthInsuranceRate;
         this.payslips = new ArrayList<>(); // Initialize as ArrayList of Payslip
     }
 
@@ -54,8 +54,8 @@ public class Employee {
         return salaryPoint;
     }
 
-    public LocalDate getHireDate() {
-        return hireDate;
+    public double getHealthInsuranceRate() {
+        return healthInsuranceRate;
     }
 
     public LocalDate getLastPromotionDate() {
@@ -102,7 +102,7 @@ public class Employee {
                 ",\n Position = " + employeePosition +
                 ",\n Salary = " + salary +
                 ",\n SalaryPoint = " + salaryPoint +
-                ",\n HireDate = " + hireDate +
+                ",\n HealthInsuranceRate = " + healthInsuranceRate +
                 ",\n LastPromotionDate = " + lastPromotionDate;
     }
 }
