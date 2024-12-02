@@ -1,2 +1,3 @@
-name, employeeID, employeeType, jobTitle, salary, salaryPoint, lastPromotionDate, healthInsuranceRATE
-david,1,FULL_TIME,PROFESSOR,101447.00,1,2024-11-26,3.00
+name,employeeId,employeeType,employeePosition,salary,salaryPoint,lastPromotionDate,healthInsuranceRate
+David,1,FULL_TIME,PRESIDENT,240716.00,1,2024-12-02,12.00
+CONOR,2,PART_TIME,COOK,0.00,0,2024-12-02,0.00

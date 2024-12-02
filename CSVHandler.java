@@ -56,7 +56,7 @@ public class CSVHandler {
                                     employeePosition, // job title
                                     hourlyRate,      // hourly rate
                                     hoursWorked,     // hours worked
-                                    LocalDate.now(), // assuming current date as the last promotion date
+                                    LocalDate.now(), // current date as the last promotion date
                                     hasSubmittedPaymentRequest // payment request status
                             );
 
@@ -191,4 +191,155 @@ public class CSVHandler {
         // If not found, return -1 as a default value indicating salary not found
         return -1;
     }
+
+
+    public static void updateEmployeeInCSV(Employee updatedEmployee) {
+        // Read all employees (both full-time and part-time) from Employees.csv
+        List<Employee> employees = readEmployeesFromCSV();
+        List<String[]> partTimeData = new ArrayList<>();
+
+        // Load part-time-specific data from PartTimeEmployees.csv
+        try (BufferedReader br = new BufferedReader(new FileReader("PartTimeEmployees.csv"))) {
+            br.readLine(); // Skip the header line
+            String line;
+            while ((line = br.readLine()) != null) {
+                partTimeData.add(line.split(","));
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading PartTimeEmployees.csv: " + e.getMessage());
+        }
+
+        // Iterate through employees to find the one to update
+        boolean employeeFound = false;
+        for (int i = 0; i < employees.size(); i++) {
+            Employee employee = employees.get(i);
+            if (employee.getEmployeeId() == updatedEmployee.getEmployeeId()) {
+                // Update the employee's data
+                employees.set(i, updatedEmployee);
+                employeeFound = true;
+                break;
+            }
+        }
+
+        // If the employee was found, update both CSV files
+        if (employeeFound) {
+            try {
+                // Write the updated employees to Employees.csv
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("Employees.csv"))) {
+                    writer.write("name,employeeId,employeeType,employeePosition,salary,salaryPoint,lastPromotionDate,healthInsuranceRate\n");
+                    for (Employee employee : employees) {
+                        writer.write(String.format("%s,%d,%s,%s,%.2f,%d,%s,%.2f\n",
+                                employee.getName(),
+                                employee.getEmployeeId(),
+                                employee.getEmployeeType(),
+                                employee.getEmployeePosition(),
+                                employee.getSalary(),
+                                employee.getSalaryPoint(),
+                                employee.getLastPromotionDate(),
+                                employee.getHealthInsuranceRate()));
+                    }
+                }
+
+                // Update part-time-specific data in PartTimeEmployees.csv
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter("PartTimeEmployees.csv"))) {
+                    writer.write("employeeId,hourlyRate,hoursWorked,paymentRequestSubmitted\n");
+
+                    boolean updated = false; // Track if part-time employee was updated
+                    for (String[] partTimeParts : partTimeData) {
+                        int partTimeId = Integer.parseInt(partTimeParts[0].trim());
+                        if (partTimeId == updatedEmployee.getEmployeeId() && updatedEmployee instanceof PartTimeEmployee) {
+                            // Write updated part-time employee details
+                            PartTimeEmployee partTimeEmployee = (PartTimeEmployee) updatedEmployee;
+                            writer.write(String.format("%d,%.2f,%d,%b\n",
+                                    partTimeEmployee.getEmployeeId(),
+                                    partTimeEmployee.getHourlyRate(),
+                                    partTimeEmployee.getHoursWorked(),
+                                    partTimeEmployee.isPaymentRequestSubmitted()));
+                            updated = true;
+                        } else {
+                            // Write original data for other part-time employees
+                            writer.write(String.join(",", partTimeParts) + "\n");
+                        }
+                    }
+
+                    // If the part-time employee wasn't found, add them
+                    if (!updated && updatedEmployee instanceof PartTimeEmployee) {
+                        PartTimeEmployee partTimeEmployee = (PartTimeEmployee) updatedEmployee;
+                        writer.write(String.format("%d,%.2f,%d,%b\n",
+                                partTimeEmployee.getEmployeeId(),
+                                partTimeEmployee.getHourlyRate(),
+                                partTimeEmployee.getHoursWorked(),
+                                partTimeEmployee.isPaymentRequestSubmitted()));
+                    }
+                }
+
+                System.out.println("Employee data updated successfully!");
+            } catch (IOException e) {
+                System.err.println("Error updating the CSV files: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Employee with ID " + updatedEmployee.getEmployeeId() + " not found.");
+        }
+    }
+    public static void writePayslipToCSV(Payslip payslip) {
+        String filePath = "Payslips.csv";
+        File file = new File(filePath);
+        boolean writeHeader = !file.exists() || file.length() == 0;
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
+            if (writeHeader) {
+                writer.write("employeeId,employeeName,payDate,grossPay,netPay");
+                writer.newLine();
+            }
+
+            String line = String.format("%d,%s,%s,%.2f,%.2f",
+                    payslip.getEmployeeId(),
+                    payslip.getEmployeeName(),
+                    payslip.getPayDate(),
+                    payslip.getGrossPay(),
+                    payslip.getNetPay());
+
+            writer.write(line);
+            writer.newLine();
+            System.out.println("Payslip written to Payslips.csv successfully.");
+        } catch (IOException e) {
+            System.err.println("Error writing Payslip to Payslips.csv: " + e.getMessage());
+        }
+    }
+    public static List<Payslip> readPayslipsForEmployee(int employeeId) {
+        List<Payslip> payslips = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader("payslips.csv"))) {
+            String line;
+
+            // Skip the header
+            line = br.readLine(); // Read the first line (header) and do nothing with it
+
+            // Process remaining lines
+            while ((line = br.readLine()) != null) {
+                String[] fields = line.split(",");
+                if (fields.length != 5) {
+                    System.out.println("Skipping invalid line: " + line);
+                    continue; // Skip malformed rows
+                }
+
+                int id = Integer.parseInt(fields[0]); // employeeId
+                if (id == employeeId) {
+                    // Parse remaining fields
+                    String employeeName = fields[1]; // Not used
+                    LocalDate payDate = LocalDate.parse(fields[2]); // payDate
+                    double grossPay = Double.parseDouble(fields[3]); // grossPay
+                    double netPay = Double.parseDouble(fields[4]);   // netPay
+
+                    // Create a new Payslip object
+                    payslips.add(new Payslip(id, employeeName, payDate, grossPay, netPay));
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.out.println("Error reading payslips: " + e.getMessage());
+        }
+        return payslips;
+    }
 }
+
+
+

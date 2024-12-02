@@ -12,6 +12,7 @@ public class PartTimeEmployee extends Employee {
         this.hourlyRate = hourlyRate;
         this.hoursWorked = hoursWorked;
         this.hasSubmittedPaymentRequest = hasSubmittedPaymentRequest;
+        setDeductionsCalculator(new PartTimeEmployeeDeductionsCalculator());
     }
 
     public int getHoursWorked() {
@@ -36,6 +37,16 @@ public class PartTimeEmployee extends Employee {
 
     public void submitPaymentRequest() {
         this.hasSubmittedPaymentRequest = true;
+    }
+
+    @Override
+    public void addPayslip(Payslip payslip) {
+        if (payslip == null) {
+            throw new IllegalArgumentException("Payslip cannot be null.");
+        }
+        // Reset hoursWorked and paymentRequestSubmitted
+        this.hoursWorked = 0;
+        this.hasSubmittedPaymentRequest = false;
     }
 
     @Override
