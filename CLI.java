@@ -199,7 +199,8 @@ public class CLI {
             Employee newEmployee;
             if (employeeType == Employee.EmployeeType.FULL_TIME) {
                 // Create a full-time employee
-                newEmployee = new Employee(name, CSVHandler.getLowestUniqueId(), employeeType, position, payRate, scalePoint, lastPromotionDate, healthInsuranceRate);
+                int newID = CSVHandler.getLowestUniqueId();
+                newEmployee = new Employee(name, newID, employeeType, position, payRate, scalePoint, lastPromotionDate, healthInsuranceRate);
             } else {
                 // Create a part-time employee
                 newEmployee = new PartTimeEmployee(name, CSVHandler.getLowestUniqueId(), position, payRate, 0, lastPromotionDate, false);
@@ -207,7 +208,7 @@ public class CLI {
 
             // Write employee to CSV
             CSVHandler.writeEmployeeToCSV(newEmployee);
-            System.out.println("New employee created successfully!");
+            System.out.println("New employee created successfully! Employee ID: "+ newEmployee.getEmployeeId());
         } catch (Exception e) {
             System.out.println("Error creating employee. Please try again.");
             e.printStackTrace(); // Optional: for debugging purposes
